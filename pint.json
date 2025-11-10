@@ -3,13 +3,19 @@
     "notPath": ["tests/TestCase.php", "tmp"],
     "rules": {
         "array_push": true,
+        "phpdoc_trim": true,
+        "phpdoc_align": {
+            "align": "left"
+        },
+        "phpdoc_indent": true,
+        "phpdoc_separation": true,
         "backtick_to_shell_exec": true,
         "date_time_immutable": true,
         "declare_strict_types": true,
         "lowercase_keywords": true,
         "lowercase_static_reference": true,
         "final_class": false,
-        "final_internal_class": true,
+        "final_internal_class": false,
         "final_public_method_for_abstract_class": true,
         "fully_qualified_strict_types": true,
         "global_namespace_import": {
@@ -23,6 +29,9 @@
         "no_superfluous_elseif": true,
         "no_useless_else": true,
         "no_multiple_statements_per_line": true,
+        "ordered_imports": {
+            "sort_algorithm": "length"
+        },
         "ordered_class_elements": {
             "order": [
                 "use_trait",

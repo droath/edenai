@@ -6,3 +6,8 @@ parameters:
     paths:
         - src
     tmpDir: build/phpstan
+    scanDirectories:
+        - vendor/php-http/discovery/src
+        - vendor/psr/http-client/src
+        - vendor/psr/http-factory/src
+        - vendor/psr/http-message/src

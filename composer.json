@@ -15,19 +15,35 @@
         }
     ],
     "require": {
-        "php": "^8.3"
+        "php": "^8.3",
+        "php-http/discovery": "^1.20",
+        "psr/http-client": "^1.0",
+        "psr/http-factory": "^1.1",
+        "psr/http-message": "^2.0"
+    },
+    "suggest": {
+        "guzzlehttp/guzzle": "Required for making HTTP requests if no other PSR-18 client is provided"
     },
     "require-dev": {
+        "guzzlehttp/guzzle": "^7.10",
         "laravel/pint": "^1.14",
+        "mockery/mockery": "^1.6",
+        "nyholm/psr7": "^1.8",
         "pestphp/pest": "^3.0|^4.0",
         "pestphp/pest-plugin-arch": "^3.0|^4.0",
+        "php-http/mock-client": "^1.6",
         "phpstan/extension-installer": "^1.4",
         "phpstan/phpstan-deprecation-rules": "^2.0",
         "phpstan/phpstan-phpunit": "^2.0"
     },
     "autoload": {
         "psr-4": {
-            "Droath\\Edenai\\": "src/"
+            "Droath\\Edenai\\": "src/",
+            "Droath\\Edenai\\DTOs\\": "src/DTOs/",
+            "Droath\\Edenai\\Exceptions\\": "src/Exceptions/",
+            "Droath\\Edenai\\Http\\": "src/Http/",
+            "Droath\\Edenai\\Middleware\\": "src/Middleware/",
+            "Droath\\Edenai\\Resources\\": "src/Resources/"
         }
     },
     "autoload-dev": {
@@ -45,6 +61,7 @@
         "sort-packages": true,
         "allow-plugins": {
             "pestphp/pest-plugin": true,
+            "php-http/discovery": true,
             "phpstan/extension-installer": true
         }
     },
