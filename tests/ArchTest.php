@@ -76,3 +76,81 @@ arch('exception classes extend base ApiException')
     ->toExtend('Droath\Edenai\Exceptions\ApiException')
     ->and('Droath\Edenai\Exceptions\NetworkException')
     ->toExtend('Droath\Edenai\Exceptions\ApiException');
+
+/**
+ * Audio Endpoints Feature Architecture Tests
+ *
+ * These tests verify architectural patterns and code quality standards
+ * specifically for the audio endpoints implementation (Task Group 6).
+ */
+
+arch('all audio request DTOs extend AbstractRequestDTO')
+    ->expect('Droath\Edenai\DTOs\Audio\SpeechToTextAsyncRequest')
+    ->toExtend('Droath\Edenai\DTOs\AbstractRequestDTO')
+    ->and('Droath\Edenai\DTOs\Audio\TextToSpeechRequest')
+    ->toExtend('Droath\Edenai\DTOs\AbstractRequestDTO')
+    ->and('Droath\Edenai\DTOs\Audio\TextToSpeechAsyncRequest')
+    ->toExtend('Droath\Edenai\DTOs\AbstractRequestDTO');
+
+arch('all audio response DTOs extend AbstractResponseDTO')
+    ->expect('Droath\Edenai\DTOs\Audio\SpeechToTextAsyncResponse')
+    ->toExtend('Droath\Edenai\DTOs\AbstractResponseDTO')
+    ->and('Droath\Edenai\DTOs\Audio\TextToSpeechResponse')
+    ->toExtend('Droath\Edenai\DTOs\AbstractResponseDTO')
+    ->and('Droath\Edenai\DTOs\Audio\TextToSpeechAsyncResponse')
+    ->toExtend('Droath\Edenai\DTOs\AbstractResponseDTO');
+
+arch('AudioResource extends AbstractResource')
+    ->expect('Droath\Edenai\Resources\AudioResource')
+    ->toExtend('Droath\Edenai\Resources\AbstractResource');
+
+arch('all audio DTOs are marked final and readonly')
+    ->expect('Droath\Edenai\DTOs\Audio\SpeechToTextAsyncRequest')
+    ->toBeFinal()
+    ->and('Droath\Edenai\DTOs\Audio\SpeechToTextAsyncResponse')
+    ->toBeFinal()
+    ->and('Droath\Edenai\DTOs\Audio\TextToSpeechRequest')
+    ->toBeFinal()
+    ->and('Droath\Edenai\DTOs\Audio\TextToSpeechResponse')
+    ->toBeFinal()
+    ->and('Droath\Edenai\DTOs\Audio\TextToSpeechAsyncRequest')
+    ->toBeFinal()
+    ->and('Droath\Edenai\DTOs\Audio\TextToSpeechAsyncResponse')
+    ->toBeFinal();
+
+arch('ServiceProviderEnum is a backed enum')
+    ->expect('Droath\Edenai\Enums\ServiceProviderEnum')
+    ->toBeEnum();
+
+arch('AudioResource is marked final')
+    ->expect('Droath\Edenai\Resources\AudioResource')
+    ->toBeFinal();
+
+arch('FileUploadException extends base Exception not ApiException')
+    ->expect('Droath\Edenai\Exceptions\FileUploadException')
+    ->toExtend('Exception')
+    ->not->toExtend('Droath\Edenai\Exceptions\ApiException');
+
+arch('audio DTOs use strict types declaration')
+    ->expect('Droath\Edenai\DTOs\Audio')
+    ->toUseStrictTypes();
+
+arch('audio resource uses strict types declaration')
+    ->expect('Droath\Edenai\Resources\AudioResource')
+    ->toUseStrictTypes();
+
+arch('FileUploadTrait uses strict types declaration')
+    ->expect('Droath\Edenai\Traits\FileUploadTrait')
+    ->toUseStrictTypes();
+
+arch('ServiceProviderEnum uses strict types declaration')
+    ->expect('Droath\Edenai\Enums\ServiceProviderEnum')
+    ->toUseStrictTypes();
+
+arch('audio DTOs do not use deprecated functions')
+    ->expect('Droath\Edenai\DTOs\Audio')
+    ->not->toUse(['create_function', 'each', 'ereg', 'money_format', 'split']);
+
+arch('AudioResource does not use deprecated functions')
+    ->expect('Droath\Edenai\Resources\AudioResource')
+    ->not->toUse(['create_function', 'each', 'ereg', 'money_format', 'split']);

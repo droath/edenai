@@ -31,8 +31,6 @@ use Psr\Http\Message\ResponseInterface;
  *     // Handle low rate limit
  * }
  * ```
- *
- * @package Droath\Edenai\DTOs
  */
 final class ResponseMetadata
 {
@@ -49,8 +47,7 @@ final class ResponseMetadata
         public readonly ?int $rateLimitRemaining = null,
         public readonly ?int $rateLimitReset = null,
         public readonly ?string $requestId = null,
-    ) {
-    }
+    ) {}
 
     /**
      * Create metadata from a PSR-7 Response object.
@@ -123,7 +120,7 @@ final class ResponseMetadata
      */
     private static function extractIntHeader(array $headers, string $name): ?int
     {
-        if (!isset($headers[$name][0])) {
+        if (! isset($headers[$name][0])) {
             return null;
         }
 

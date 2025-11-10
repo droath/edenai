@@ -150,7 +150,7 @@ abstract class AbstractResource
      *
      * @return ResponseInterface The PSR-7 HTTP response
      *
-     * @throws \JsonException
+     * @throws JsonException
      */
     protected function patch(string $path, array $payload = [], array $headers = []): ResponseInterface
     {

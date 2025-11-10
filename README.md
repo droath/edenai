@@ -123,6 +123,181 @@ echo $response->count; // int
 echo $response->createdAt->format('Y-m-d'); // DateTimeImmutable
 ```
 
+## Audio Resources
+
+The SDK provides comprehensive support for Eden AI's audio processing endpoints:
+
+### Speech-to-Text (Async)
+
+Upload audio files for asynchronous transcription:
+
+```php
+<?php
+
+declare(strict_types=1);
+
+use Droath\Edenai\Http\ApiClient;
+use Droath\Edenai\Resources\AudioResource;
+use Droath\Edenai\DTOs\Audio\SpeechToTextAsyncRequest;
+use Droath\Edenai\Enums\ServiceProviderEnum;
+
+$client = new ApiClient();
+$audioResource = new AudioResource($client);
+
+// Create request with file upload
+$request = new SpeechToTextAsyncRequest(
+    file: '/path/to/audio.mp3',
+    providers: [ServiceProviderEnum::GOOGLE, ServiceProviderEnum::DEEPGRAM],
+    language: 'en',
+);
+
+// Upload file and get job ID for tracking
+$response = $audioResource->speechToTextAsync($request);
+
+echo "Job ID: {$response->jobId}";
+echo "Providers: " . implode(', ', $response->providers);
+echo "Created: {$response->timestamp->format('Y-m-d H:i:s')}";
+```
+
+**Supported Audio Formats:** mp3, wav, flac, ogg
+
+### Text-to-Speech (Sync)
+
+Generate audio from text synchronously:
+
+```php
+<?php
+
+declare(strict_types=1);
+
+use Droath\Edenai\Http\ApiClient;
+use Droath\Edenai\Resources\AudioResource;
+use Droath\Edenai\DTOs\Audio\TextToSpeechRequest;
+use Droath\Edenai\Enums\ServiceProviderEnum;
+
+$client = new ApiClient();
+$audioResource = new AudioResource($client);
+
+// Create request with all optional parameters
+$request = new TextToSpeechRequest(
+    text: 'Hello world',
+    providers: [ServiceProviderEnum::AMAZON],
+    language: 'en',
+    option: 'FEMALE',
+    audioFormat: 'mp3',
+    rate: 1.0,
+    pitch: 0.0,
+    volume: 1.0,
+    voiceModel: 'neural',
+);
+
+// Get generated audio immediately
+$response = $audioResource->textToSpeech($request);
+
+// Save audio to file (already decoded from Base64)
+file_put_contents('output.mp3', $response->audioData);
+
+echo "Audio type: {$response->contentType}";
+echo "Duration: {$response->duration} seconds";
+```
+
+### Text-to-Speech (Async)
+
+Generate audio from text asynchronously:
+
+```php
+<?php
+
+declare(strict_types=1);
+
+use Droath\Edenai\Http\ApiClient;
+use Droath\Edenai\Resources\AudioResource;
+use Droath\Edenai\DTOs\Audio\TextToSpeechAsyncRequest;
+use Droath\Edenai\Enums\ServiceProviderEnum;
+
+$client = new ApiClient();
+$audioResource = new AudioResource($client);
+
+// Create async request
+$request = new TextToSpeechAsyncRequest(
+    text: 'This is a longer text that will be processed asynchronously',
+    providers: [ServiceProviderEnum::MICROSOFT, ServiceProviderEnum::AZURE],
+    language: 'en-US',
+    option: 'MALE',
+    audioFormat: 'wav',
+);
+
+// Get job ID for polling
+$response = $audioResource->textToSpeechAsync($request);
+
+echo "Job ID: {$response->jobId}";
+echo "Check status later to retrieve generated audio";
+```
+
+### AI Service Providers
+
+The `ServiceProviderEnum` provides type-safe provider selection:
+
+```php
+<?php
+
+declare(strict_types=1);
+
+use Droath\Edenai\Enums\ServiceProviderEnum;
+
+// Available providers:
+ServiceProviderEnum::GOOGLE      // Google Cloud
+ServiceProviderEnum::AMAZON      // Amazon AWS
+ServiceProviderEnum::MICROSOFT   // Microsoft Azure
+ServiceProviderEnum::OPENAI      // OpenAI
+ServiceProviderEnum::DEEPGRAM    // Deepgram
+ServiceProviderEnum::ASSEMBLY_AI // AssemblyAI
+ServiceProviderEnum::REV_AI      // Rev.ai
+ServiceProviderEnum::SPEECHMATICS // Speechmatics
+ServiceProviderEnum::IBMWATSON   // IBM Watson
+ServiceProviderEnum::AZURE       // Azure Cognitive Services
+```
+
+### Error Handling for Audio Endpoints
+
+Audio operations include specific exceptions:
+
+```php
+<?php
+
+declare(strict_types=1);
+
+use Droath\Edenai\Http\ApiClient;
+use Droath\Edenai\Resources\AudioResource;
+use Droath\Edenai\DTOs\Audio\SpeechToTextAsyncRequest;
+use Droath\Edenai\Enums\ServiceProviderEnum;
+use Droath\Edenai\Exceptions\FileUploadException;
+use Droath\Edenai\Exceptions\ValidationException;
+use InvalidArgumentException;
+
+$client = new ApiClient();
+$audioResource = new AudioResource($client);
+
+try {
+    $request = new SpeechToTextAsyncRequest(
+        file: '/path/to/audio.mp3',
+        providers: [ServiceProviderEnum::GOOGLE],
+        language: 'en',
+    );
+    $response = $audioResource->speechToTextAsync($request);
+} catch (InvalidArgumentException $e) {
+    // Request DTO validation failed (e.g., empty text)
+    echo 'Invalid request: ' . $e->getMessage();
+} catch (FileUploadException $e) {
+    // File not found or not readable
+    echo 'File upload error: ' . $e->getMessage();
+} catch (ValidationException $e) {
+    // Unsupported audio format or API validation error
+    echo 'Validation error: ' . $e->getMessage();
+    print_r($e->getErrors());
+}
+```
+
 ## Advanced Usage
 
 ### Custom Middleware

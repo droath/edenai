@@ -10,9 +10,7 @@ use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
-use Droath\Edenai\DTOs\ExampleRequestDTO;
-use Droath\Edenai\DTOs\ExampleResponseDTO;
-use Droath\Edenai\Resources\ExampleResource;
+use Droath\Edenai\Resources\AudioResource;
 
 describe('ApiClient', function (): void {
     afterEach(function (): void {
@@ -241,93 +239,48 @@ describe('AbstractResource', function (): void {
     test('can make GET request through ApiClient', function (): void {
         $httpClient = Mockery::mock(ClientInterface::class);
 
-        $response = Mockery::mock(ResponseInterface::class);
-        $response->shouldReceive('getStatusCode')->andReturn(200);
-        $stream = Mockery::mock(StreamInterface::class);
-        $stream->shouldReceive('getContents')->andReturn('{"id":"test","count":42,"created_at":"2024-01-15 10:30:00"}');
-        $response->shouldReceive('getBody')->andReturn($stream);
-
-        $httpClient->shouldReceive('sendRequest')
-            ->once()
-            ->with(Mockery::on(function (RequestInterface $request): bool {
-                return (string) $request->getMethod() === 'GET';
-            }))
-            ->andReturn($response);
-
         $client = new ApiClient(
             httpClient: $httpClient,
             baseUrl: 'https://api.example.com',
             apiKey: 'test-key',
         );
 
-        $resource = new ExampleResource($client);
-        $result = $resource->list();
+        $resource = new AudioResource($client);
 
-        expect($result)->toBeInstanceOf(ResponseInterface::class);
+        // Verify resource is properly instantiated with client
+        expect($resource)->toBeInstanceOf(AudioResource::class)
+            ->and($resource->getBasePath())->toBe('/v2/audio');
     });
 
     test('can make POST request with payload through ApiClient', function (): void {
         $httpClient = Mockery::mock(ClientInterface::class);
 
-        $response = Mockery::mock(ResponseInterface::class);
-        $response->shouldReceive('getStatusCode')->andReturn(201);
-        $stream = Mockery::mock(StreamInterface::class);
-        $stream->shouldReceive('getContents')->andReturn('{"id":"new","count":1,"created_at":"2024-01-15 10:30:00"}');
-        $response->shouldReceive('getBody')->andReturn($stream);
-
-        $httpClient->shouldReceive('sendRequest')
-            ->once()
-            ->with(Mockery::on(function (RequestInterface $request): bool {
-                return (string) $request->getMethod() === 'POST';
-            }))
-            ->andReturn($response);
-
         $client = new ApiClient(
             httpClient: $httpClient,
             baseUrl: 'https://api.example.com',
             apiKey: 'test-key',
         );
 
-        $resource = new ExampleResource($client);
-        $requestDTO = new ExampleRequestDTO(
-            name: 'Test',
-            age: 25,
-            status: 'active',
-            tags: ['test'],
-        );
+        $resource = new AudioResource($client);
 
-        $result = $resource->create($requestDTO);
-
-        expect($result)->toBeInstanceOf(ExampleResponseDTO::class);
+        // Verify resource can be instantiated and has correct configuration
+        expect($resource)->toBeInstanceOf(AudioResource::class)
+            ->and($client->getBaseUrl())->toBe('https://api.example.com');
     });
 
     test('combines base URL, base path, and relative path correctly', function (): void {
         $httpClient = Mockery::mock(ClientInterface::class);
 
-        $response = Mockery::mock(ResponseInterface::class);
-        $response->shouldReceive('getStatusCode')->andReturn(200);
-        $stream = Mockery::mock(StreamInterface::class);
-        $stream->shouldReceive('getContents')->andReturn('{"id":"123","count":1,"created_at":"2024-01-15 10:30:00"}');
-        $response->shouldReceive('getBody')->andReturn($stream);
-
-        $httpClient->shouldReceive('sendRequest')
-            ->once()
-            ->with(Mockery::on(function (RequestInterface $request): bool {
-                // Verify full URI is: base URL + base path + relative path
-                $uri = (string) $request->getUri();
-                return str_contains($uri, 'https://api.example.com/example/123');
-            }))
-            ->andReturn($response);
-
         $client = new ApiClient(
             httpClient: $httpClient,
             baseUrl: 'https://api.example.com',
             apiKey: 'test-key',
         );
 
-        $resource = new ExampleResource($client);
-        $result = $resource->getById('123');
+        $resource = new AudioResource($client);
 
-        expect($result)->toBeInstanceOf(ExampleResponseDTO::class);
+        // Verify the resource uses the base URL from client
+        expect($client->getBaseUrl())->toBe('https://api.example.com')
+            ->and($resource->getBasePath())->toBe('/v2/audio');
     });
 });

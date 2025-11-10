@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Droath\Edenai\DTOs;
 
-use InvalidArgumentException;
-
 /**
  * Abstract base class for request Data Transfer Objects.
  *
@@ -43,7 +41,7 @@ use InvalidArgumentException;
 abstract class AbstractRequestDTO
 {
     /**
-     * Convert the DTO to an array for serialization to HTTP request body.
+     * Convert the DTO to an array for serialization to the HTTP request body.
      *
      * This method should return an associative array suitable for JSON encoding
      * and sending as the request payload to the API.
