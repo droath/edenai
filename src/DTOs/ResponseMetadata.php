@@ -47,7 +47,8 @@ final class ResponseMetadata
         public readonly ?int $rateLimitRemaining = null,
         public readonly ?int $rateLimitReset = null,
         public readonly ?string $requestId = null,
-    ) {}
+    ) {
+    }
 
     /**
      * Create metadata from a PSR-7 Response object.

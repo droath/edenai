@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Droath\Edenai\DTOs\Audio;
 
 use DateTimeImmutable;
-use DateMalformedStringException;
 use Droath\Edenai\DTOs\AbstractResponseDTO;
 
 /**
@@ -49,7 +48,8 @@ final class TextToSpeechAsyncResponse extends AbstractResponseDTO
         public readonly string $jobId,
         public readonly array $providers,
         public readonly DateTimeImmutable $submittedAt,
-    ) {}
+    ) {
+    }
 
     /**
      * Create a response DTO from API response data.

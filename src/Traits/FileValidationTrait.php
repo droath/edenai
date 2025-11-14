@@ -37,6 +37,11 @@ trait FileValidationTrait
             throw new FileUploadException("File not found: {$filePath}");
         }
 
+        // Validate path is a file (not a directory)
+        if (! is_file($filePath)) {
+            throw new FileUploadException("Path is not a file: {$filePath}");
+        }
+
         // Validate file is readable
         if (! is_readable($filePath)) {
             throw new FileUploadException("File is not readable: {$filePath}");

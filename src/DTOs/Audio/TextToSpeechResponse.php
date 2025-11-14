@@ -46,7 +46,8 @@ final class TextToSpeechResponse extends AbstractResponseDTO
         public readonly string $audioData,
         public readonly string $contentType,
         public readonly ?float $duration = null,
-    ) {}
+    ) {
+    }
 
     /**
      * Create a response DTO from API response data.

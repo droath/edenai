@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Droath\Edenai\DTOs\Audio;
 
 use InvalidArgumentException;
+use Droath\Edenai\Enums\VoiceOptionEnum;
 use Droath\Edenai\DTOs\AbstractRequestDTO;
 use Droath\Edenai\Enums\ServiceProviderEnum;
 
@@ -49,6 +50,47 @@ final class TextToSpeechRequest extends AbstractRequestDTO
         if ($this->text === '') {
             throw new InvalidArgumentException('Text cannot be empty');
         }
+    }
+    /**
+     * Create a new text-to-speech request using fluent factory method.
+     *
+     * This factory method provides a convenient way to create text-to-speech requests
+     * with sensible defaults. The voice option defaults to FEMALE if not specified,
+     * ensuring API compatibility while maintaining flexibility.
+     *
+     * @param string $text The text to convert to speech (non-empty string)
+     * @param array<int, ServiceProviderEnum> $providers AI service providers to use for synthesis
+     * @param VoiceOptionEnum $option Voice gender/type option (default: FEMALE)
+     * @param string $language ISO language code for speech synthesis (default: 'en')
+     * @param string|null $audioFormat Desired output audio format (e.g., 'mp3', 'wav')
+     * @param int|null $rate Speech rate modifier (provider-specific range, typically 0.5-2.0)
+     * @param int|null $pitch Voice pitch modifier (provider-specific range)
+     * @param int|null $volume Audio volume modifier (provider-specific range, typically 0.0-1.0)
+     *
+     * @return self
+     *
+     * @throws InvalidArgumentException If text is empty
+     */
+    public static function make(
+        string $text,
+        array $providers,
+        VoiceOptionEnum $option = VoiceOptionEnum::FEMALE,
+        string $language = 'en',
+        ?string $audioFormat = null,
+        ?int $rate = null,
+        ?int $pitch = null,
+        ?int $volume = null
+    ): self {
+        return new self(
+            text: $text,
+            providers: $providers,
+            language: $language,
+            option: $option->value,
+            audioFormat: $audioFormat,
+            rate: $rate,
+            pitch: $pitch,
+            volume: $volume
+        );
     }
 
     /**

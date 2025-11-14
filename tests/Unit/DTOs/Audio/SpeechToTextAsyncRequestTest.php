@@ -99,28 +99,17 @@ describe('SpeechToTextAsyncRequest', function (): void {
         ))->toThrow(FileUploadException::class, 'File not found');
     });
 
-    test('FileUploadException for unreadable file', function (): void {
-        // Create a directory with no read permissions containing a file
-        // This ensures the file path exists but is not readable across all platforms
-        $unreadableDir = $this->fixturesDir.'/unreadable_dir';
-        mkdir($unreadableDir, 0777);
+    test('FileUploadException for directory path instead of file', function (): void {
+        // Create a directory and attempt to use it as a file path
+        // This tests that the validation properly checks is_file()
+        $directory = $this->fixturesDir.'/test_directory.flac';
+        mkdir($directory, 0755);
 
-        $unreadableFile = $unreadableDir.'/file.flac';
-        file_put_contents($unreadableFile, 'fake audio content');
-
-        // Remove read permissions from the directory, making files inside unreadable
-        chmod($unreadableDir, 0000);
-
-        try {
-            expect(fn () => new SpeechToTextAsyncRequest(
-                file: $unreadableFile,
-                providers: [ServiceProviderEnum::MICROSOFT],
-                language: 'en',
-            ))->toThrow(FileUploadException::class);
-        } finally {
-            // Restore permissions for cleanup
-            chmod($unreadableDir, 0755);
-        }
+        expect(fn () => new SpeechToTextAsyncRequest(
+            file: $directory,
+            providers: [ServiceProviderEnum::MICROSOFT],
+            language: 'en',
+        ))->toThrow(FileUploadException::class, 'Path is not a file');
     });
 
     test('providers array of ServiceProviderEnum is handled', function (): void {

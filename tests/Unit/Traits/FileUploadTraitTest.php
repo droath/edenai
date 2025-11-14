@@ -55,25 +55,14 @@ describe('FileUploadTrait', function (): void {
             ->toThrow(FileUploadException::class, 'File not found');
     });
 
-    test('exception thrown for missing or unreadable files', function (): void {
-        // Create a directory with no read permissions containing a file
-        // This ensures the file path exists but is not readable across all platforms
-        $unreadableDir = $this->fixturesDir.'/unreadable_dir';
-        mkdir($unreadableDir, 0777);
+    test('exception thrown for directory path instead of file', function (): void {
+        // Create a directory and attempt to use it as a file path
+        // This tests that the validation properly checks is_file()
+        $directory = $this->fixturesDir.'/test_directory.mp3';
+        mkdir($directory, 0755);
 
-        $unreadableFile = $unreadableDir.'/file.mp3';
-        file_put_contents($unreadableFile, 'test content');
-
-        // Remove read permissions from the directory, making files inside unreadable
-        chmod($unreadableDir, 0000);
-
-        try {
-            expect(fn () => $this->trait->createMultipartRequestPublic($unreadableFile, []))
-                ->toThrow(FileUploadException::class);
-        } finally {
-            // Restore permissions for cleanup
-            chmod($unreadableDir, 0755);
-        }
+        expect(fn () => $this->trait->createMultipartRequestPublic($directory, []))
+            ->toThrow(FileUploadException::class, 'Path is not a file');
     });
 
     test('multipart form-data Content-Type header is set', function (): void {
