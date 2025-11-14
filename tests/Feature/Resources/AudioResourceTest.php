@@ -47,9 +47,11 @@ describe('Feature: AudioResource - speechToTextAsync()', function (): void {
         $response->shouldReceive('getStatusCode')->andReturn(200);
         $stream = Mockery::mock(StreamInterface::class);
         $stream->shouldReceive('getContents')->andReturn(json_encode([
-            'job_id' => 'job-speech-123',
-            'providers' => ['google'],
-            'submitted_at' => '2024-11-09 12:00:00',
+            'public_id' => 'job-speech-123',
+            'status' => 'pending',
+            'results' => [
+                'google' => ['status' => 'pending'],
+            ],
         ]));
         $response->shouldReceive('getBody')->andReturn($stream);
 
@@ -105,9 +107,10 @@ describe('Feature: AudioResource - textToSpeech()', function (): void {
         $response->shouldReceive('getStatusCode')->andReturn(200);
         $stream = Mockery::mock(StreamInterface::class);
         $stream->shouldReceive('getContents')->andReturn(json_encode([
-            'audio' => $base64Audio,
-            'content_type' => 'audio/mpeg',
-            'duration' => null,
+            'google' => [
+                'audio' => $base64Audio,
+                'duration' => null,
+            ],
         ]));
         $response->shouldReceive('getBody')->andReturn($stream);
 
@@ -157,9 +160,10 @@ describe('Feature: AudioResource - textToSpeechAsync()', function (): void {
         $response->shouldReceive('getStatusCode')->andReturn(200);
         $stream = Mockery::mock(StreamInterface::class);
         $stream->shouldReceive('getContents')->andReturn(json_encode([
-            'job_id' => 'job-tts-456',
-            'providers' => ['amazon'],
-            'submitted_at' => '2024-11-09 13:00:00',
+            'public_id' => 'job-tts-456',
+            'results' => [
+                'amazon' => ['status' => 'pending'],
+            ],
         ]));
         $response->shouldReceive('getBody')->andReturn($stream);
 

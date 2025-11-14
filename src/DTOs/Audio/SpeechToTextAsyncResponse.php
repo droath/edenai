@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Droath\Edenai\DTOs\Audio;
 
 use DateTimeImmutable;
-use DateMalformedStringException;
 use Droath\Edenai\DTOs\AbstractResponseDTO;
 
 /**
@@ -53,22 +52,27 @@ final class SpeechToTextAsyncResponse extends AbstractResponseDTO
      * Create a response DTO from API response data.
      *
      * Parses the Eden AI async job response with lenient handling of unknown
-     * keys. Transforms the timestamp string to DateTimeImmutable for type
-     * safety.
+     * keys.
+     * Extracts the job ID from the public_id field and generates the current
+     * timestamp for submission time.
+     * The provider list is extracted from the result object keys.
      *
      * @param array<string, mixed> $data The API response data
      *
      * @return static The constructed response DTO
-     *
-     * @throws DateMalformedStringException
      */
     public static function fromResponse(array $data): static
     {
+        $providers = [];
+
+        if (isset($data['results']) && is_array($data['results'])) {
+            $providers = array_keys($data['results']);
+        }
+
         return new self(
-            jobId: (string) $data['job_id'],
-            providers: (array) $data['providers'],
-            submittedAt: new DateTimeImmutable((string) $data['submitted_at']),
+            jobId: (string) ($data['public_id'] ?? ''),
+            providers: $providers,
+            submittedAt: new DateTimeImmutable(),
         );
-        // Unknown keys in $data are automatically ignored (lenient parsing)
     }
 }

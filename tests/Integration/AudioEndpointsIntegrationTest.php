@@ -51,9 +51,13 @@ describe('Integration: Complete speechToTextAsync workflow', function (): void {
         $response->shouldReceive('getStatusCode')->andReturn(200);
         $stream = Mockery::mock(StreamInterface::class);
         $stream->shouldReceive('getContents')->andReturn(json_encode([
-            'job_id' => 'integration-job-12345',
-            'providers' => ['google', 'amazon', 'deepgram'],
-            'submitted_at' => '2024-11-09 15:30:00',
+            'public_id' => 'integration-job-12345',
+            'status' => 'pending',
+            'results' => [
+                'google' => ['status' => 'pending'],
+                'amazon' => ['status' => 'pending'],
+                'deepgram' => ['status' => 'pending'],
+            ],
         ]));
         $response->shouldReceive('getBody')->andReturn($stream);
 
@@ -80,8 +84,7 @@ describe('Integration: Complete speechToTextAsync workflow', function (): void {
         expect($result)->toBeInstanceOf(SpeechToTextAsyncResponse::class)
             ->and($result->jobId)->toBe('integration-job-12345')
             ->and($result->providers)->toBe(['google', 'amazon', 'deepgram'])
-            ->and($result->submittedAt)->toBeInstanceOf(DateTimeImmutable::class)
-            ->and($result->submittedAt->format('Y-m-d H:i:s'))->toBe('2024-11-09 15:30:00');
+            ->and($result->submittedAt)->toBeInstanceOf(DateTimeImmutable::class);
 
         // Clean up
         unlink($testFilePath);
@@ -105,9 +108,10 @@ describe('Integration: Complete textToSpeech workflow', function (): void {
         $response->shouldReceive('getStatusCode')->andReturn(200);
         $stream = Mockery::mock(StreamInterface::class);
         $stream->shouldReceive('getContents')->andReturn(json_encode([
-            'audio' => $base64Audio,
-            'content_type' => 'audio/wav',
-            'duration' => 12.5,
+            'microsoft' => [
+                'audio' => $base64Audio,
+                'duration' => 12.5,
+            ],
         ]));
         $response->shouldReceive('getBody')->andReturn($stream);
 
@@ -127,17 +131,16 @@ describe('Integration: Complete textToSpeech workflow', function (): void {
             language: 'en-US',
             option: 'FEMALE',
             audioFormat: 'wav',
-            rate: 1.2,
-            pitch: 0.9,
-            volume: 0.85,
-            voiceModel: 'neural',
+            rate: 1,
+            pitch: 1,
+            volume: 1,
         );
 
         $result = $resource->textToSpeech($requestDTO);
 
         expect($result)->toBeInstanceOf(TextToSpeechResponse::class)
             ->and($result->audioData)->toBe($rawAudio)
-            ->and($result->contentType)->toBe('audio/wav')
+            ->and($result->contentType)->toBe('audio/mpeg')
             ->and($result->duration)->toBe(12.5);
     });
 });
@@ -155,9 +158,11 @@ describe('Integration: Complete textToSpeechAsync workflow', function (): void {
         $response->shouldReceive('getStatusCode')->andReturn(200);
         $stream = Mockery::mock(StreamInterface::class);
         $stream->shouldReceive('getContents')->andReturn(json_encode([
-            'job_id' => 'async-tts-job-789',
-            'providers' => ['openai', 'ibmwatson'],
-            'submitted_at' => '2024-11-09 16:00:00',
+            'public_id' => 'async-tts-job-789',
+            'results' => [
+                'openai' => ['status' => 'pending'],
+                'ibmwatson' => ['status' => 'pending'],
+            ],
         ]));
         $response->shouldReceive('getBody')->andReturn($stream);
 
@@ -175,8 +180,8 @@ describe('Integration: Complete textToSpeechAsync workflow', function (): void {
             text: 'Async text-to-speech with multiple providers',
             providers: [ServiceProviderEnum::OPENAI, ServiceProviderEnum::IBMWATSON],
             language: 'es',
-            rate: 0.8,
-            pitch: 1.1,
+            rate: 1,
+            pitch: 1,
         );
 
         $result = $resource->textToSpeechAsync($requestDTO);
@@ -284,9 +289,11 @@ describe('Integration: File size and format edge cases', function (): void {
         $response->shouldReceive('getStatusCode')->andReturn(200);
         $stream = Mockery::mock(StreamInterface::class);
         $stream->shouldReceive('getContents')->andReturn(json_encode([
-            'job_id' => 'large-file-job',
-            'providers' => ['google'],
-            'submitted_at' => '2024-11-09 17:00:00',
+            'public_id' => 'large-file-job',
+            'status' => 'pending',
+            'results' => [
+                'google' => ['status' => 'pending'],
+            ],
         ]));
         $response->shouldReceive('getBody')->andReturn($stream);
 

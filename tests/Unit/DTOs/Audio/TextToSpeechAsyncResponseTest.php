@@ -8,9 +8,11 @@ use Droath\Edenai\DTOs\Audio\TextToSpeechAsyncResponse;
 describe('TextToSpeechAsyncResponse', function () {
     test('fromResponse() parses API response correctly', function () {
         $responseData = [
-            'job_id' => 'tts_job_12345',
-            'providers' => ['google', 'amazon'],
-            'submitted_at' => '2024-01-15 10:30:00',
+            'public_id' => 'tts_job_12345',
+            'results' => [
+                'google' => ['status' => 'pending'],
+                'amazon' => ['status' => 'pending'],
+            ],
         ];
 
         $response = TextToSpeechAsyncResponse::fromResponse($responseData);
@@ -18,15 +20,16 @@ describe('TextToSpeechAsyncResponse', function () {
         expect($response)->toBeInstanceOf(TextToSpeechAsyncResponse::class)
             ->and($response->jobId)->toBe('tts_job_12345')
             ->and($response->providers)->toBe(['google', 'amazon'])
-            ->and($response->submittedAt)->toBeInstanceOf(DateTimeImmutable::class)
-            ->and($response->submittedAt->format('Y-m-d H:i:s'))->toBe('2024-01-15 10:30:00');
+            ->and($response->submittedAt)->toBeInstanceOf(DateTimeImmutable::class);
     });
 
     test('identical structure to SpeechToTextAsyncResponse', function () {
         $responseData = [
-            'job_id' => 'tts_job_67890',
-            'providers' => ['microsoft', 'openai'],
-            'submitted_at' => '2024-03-20 14:45:30',
+            'public_id' => 'tts_job_67890',
+            'results' => [
+                'microsoft' => ['status' => 'pending'],
+                'openai' => ['status' => 'pending'],
+            ],
         ];
 
         $response = TextToSpeechAsyncResponse::fromResponse($responseData);
@@ -42,24 +45,32 @@ describe('TextToSpeechAsyncResponse', function () {
             ->and($propertyNames)->toContain('submittedAt');
     });
 
-    test('timestamp transformation to DateTimeImmutable', function () {
+    test('generates current timestamp for submittedAt', function () {
+        $beforeTime = new DateTimeImmutable();
+
         $responseData = [
-            'job_id' => 'tts_job_timestamp',
-            'providers' => ['deepgram'],
-            'submitted_at' => '2024-06-15 18:22:33',
+            'public_id' => 'tts_job_timestamp',
+            'results' => [
+                'deepgram' => ['status' => 'pending'],
+            ],
         ];
 
         $response = TextToSpeechAsyncResponse::fromResponse($responseData);
 
+        $afterTime = new DateTimeImmutable();
+
         expect($response->submittedAt)->toBeInstanceOf(DateTimeImmutable::class)
-            ->and($response->submittedAt->format('Y-m-d H:i:s'))->toBe('2024-06-15 18:22:33');
+            ->and($response->submittedAt->getTimestamp())->toBeGreaterThanOrEqual($beforeTime->getTimestamp())
+            ->and($response->submittedAt->getTimestamp())->toBeLessThanOrEqual($afterTime->getTimestamp());
     });
 
     test('lenient handling of unknown response keys', function () {
         $responseData = [
-            'job_id' => 'tts_job_lenient',
-            'providers' => ['google', 'azure'],
-            'submitted_at' => '2024-02-10 08:15:45',
+            'public_id' => 'tts_job_lenient',
+            'results' => [
+                'google' => ['status' => 'pending'],
+                'azure' => ['status' => 'pending'],
+            ],
             'unknown_field' => 'should be ignored',
             'extra_data' => ['nested' => 'value'],
         ];
@@ -67,14 +78,16 @@ describe('TextToSpeechAsyncResponse', function () {
         $response = TextToSpeechAsyncResponse::fromResponse($responseData);
 
         expect($response)->toBeInstanceOf(TextToSpeechAsyncResponse::class)
-            ->and($response->jobId)->toBe('tts_job_lenient');
+            ->and($response->jobId)->toBe('tts_job_lenient')
+            ->and($response->providers)->toBe(['google', 'azure']);
     });
 
     test('extends AbstractResponseDTO', function () {
         $responseData = [
-            'job_id' => 'tts_job_inheritance',
-            'providers' => ['google'],
-            'submitted_at' => '2024-01-01 00:00:00',
+            'public_id' => 'tts_job_inheritance',
+            'results' => [
+                'google' => ['status' => 'pending'],
+            ],
         ];
 
         $response = TextToSpeechAsyncResponse::fromResponse($responseData);
@@ -84,9 +97,10 @@ describe('TextToSpeechAsyncResponse', function () {
 
     test('properties use readonly modifier for immutability', function () {
         $responseData = [
-            'job_id' => 'tts_job_readonly',
-            'providers' => ['amazon'],
-            'submitted_at' => '2024-01-01 12:00:00',
+            'public_id' => 'tts_job_readonly',
+            'results' => [
+                'amazon' => ['status' => 'pending'],
+            ],
         ];
 
         $response = TextToSpeechAsyncResponse::fromResponse($responseData);
@@ -105,9 +119,14 @@ describe('TextToSpeechAsyncResponse', function () {
 
     test('handles multiple providers correctly', function () {
         $responseData = [
-            'job_id' => 'tts_job_multi',
-            'providers' => ['google', 'amazon', 'microsoft', 'openai', 'deepgram'],
-            'submitted_at' => '2024-01-15 10:30:00',
+            'public_id' => 'tts_job_multi',
+            'results' => [
+                'google' => ['status' => 'pending'],
+                'amazon' => ['status' => 'pending'],
+                'microsoft' => ['status' => 'pending'],
+                'openai' => ['status' => 'pending'],
+                'deepgram' => ['status' => 'pending'],
+            ],
         ];
 
         $response = TextToSpeechAsyncResponse::fromResponse($responseData);
@@ -119,9 +138,10 @@ describe('TextToSpeechAsyncResponse', function () {
 
     test('contains only job tracking metadata', function () {
         $responseData = [
-            'job_id' => 'tts_job_metadata_only',
-            'providers' => ['google'],
-            'submitted_at' => '2024-01-15 10:30:00',
+            'public_id' => 'tts_job_metadata_only',
+            'results' => [
+                'google' => ['status' => 'pending'],
+            ],
         ];
 
         $response = TextToSpeechAsyncResponse::fromResponse($responseData);
@@ -131,5 +151,30 @@ describe('TextToSpeechAsyncResponse', function () {
         $properties = $reflection->getProperties(ReflectionProperty::IS_PUBLIC);
 
         expect($properties)->toHaveCount(3);
+    });
+
+    test('handles empty results array', function () {
+        $responseData = [
+            'public_id' => 'tts_job_empty',
+            'results' => [],
+        ];
+
+        $response = TextToSpeechAsyncResponse::fromResponse($responseData);
+
+        expect($response->jobId)->toBe('tts_job_empty')
+            ->and($response->providers)->toBe([]);
+    });
+
+    test('handles missing public_id field', function () {
+        $responseData = [
+            'results' => [
+                'google' => ['status' => 'pending'],
+            ],
+        ];
+
+        $response = TextToSpeechAsyncResponse::fromResponse($responseData);
+
+        expect($response->jobId)->toBe('')
+            ->and($response->providers)->toBe(['google']);
     });
 });

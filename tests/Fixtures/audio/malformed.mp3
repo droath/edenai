@@ -1,0 +1,5 @@
+This is not a valid MP3 file. It contains random text data instead of valid audio encoding.
+The purpose of this file is to simulate a malformed audio file for error testing.
+When this file is uploaded to an audio API, it should trigger validation errors.
+Random binary-like data: 0x4D5A90000300000004000000FFFF0000B8000000
+More invalid content to ensure this file fails audio processing validation.

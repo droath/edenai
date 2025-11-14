@@ -55,16 +55,25 @@ final class TextToSpeechResponse extends AbstractResponseDTO
      * immediate use. Handles missing optional fields (duration) with null defaults.
      * Parses response leniently, ignoring any unknown keys from the API.
      *
+     * The API returns provider-specific results with provider names as keys.
+     * This method extracts the first provider's audio data.
+     *
      * @param array<string, mixed> $data The API response data
      *
      * @return static The constructed response DTO
      */
     public static function fromResponse(array $data): static
     {
+        $providerResult = reset($data);
+
+        if (! is_array($providerResult)) {
+            $providerResult = [];
+        }
+
         return new self(
-            audioData: base64_decode((string) $data['audio'], true) ?: '',
-            contentType: (string) $data['content_type'],
-            duration: isset($data['duration']) ? (float) $data['duration'] : null,
+            audioData: base64_decode((string) ($providerResult['audio'] ?? ''), true) ?: '',
+            contentType: 'audio/mpeg', // Default to audio/mpeg for MP3
+            duration: isset($providerResult['duration']) ? (float) $providerResult['duration'] : null,
         );
     }
 }

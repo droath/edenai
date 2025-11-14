@@ -451,9 +451,41 @@ $headers = $metadata->getHeaders();
 
 ## Testing
 
+### Running the Test Suite
+
+Run all tests (excluding sandbox tests):
+
 ```bash
 composer test
 ```
+
+This runs the complete test suite including unit tests, feature tests, integration tests, and architecture tests. Sandbox tests requiring real API credentials are excluded by default.
+
+### Running Sandbox Tests
+
+Sandbox tests make real API calls to EdenAI and require valid API credentials. These tests are excluded from CI/CD to control API costs and rate limits.
+
+To run sandbox tests locally:
+
+1. Create a `.env.testing` file in the project root:
+
+```bash
+cp .env.testing.example .env.testing
+```
+
+2. Add your EdenAI API key to `.env.testing`:
+
+```bash
+EDENAI_API_KEY=your-real-api-key-here
+```
+
+3. Run sandbox tests:
+
+```bash
+vendor/bin/pest --group=sandbox-test
+```
+
+**Important:** Sandbox tests are excluded from automated CI/CD pipelines and must be run manually with your own API credentials. Never commit your `.env.testing` file to version control.
 
 ## Changelog
 

@@ -27,12 +27,23 @@ describe('FileUploadTrait', function (): void {
     afterEach(function (): void {
         // Clean up test fixtures
         if (is_dir($this->fixturesDir)) {
-            $files = glob($this->fixturesDir.'/*');
-            foreach ($files as $file) {
-                if (is_file($file)) {
-                    unlink($file);
+            // Recursively delete directory contents
+            $iterator = new RecursiveIteratorIterator(
+                new RecursiveDirectoryIterator($this->fixturesDir, FilesystemIterator::SKIP_DOTS),
+                RecursiveIteratorIterator::CHILD_FIRST
+            );
+
+            foreach ($iterator as $item) {
+                // Ensure we have permissions to delete
+                if ($item->isDir()) {
+                    chmod($item->getPathname(), 0755);
+                    rmdir($item->getPathname());
+                } else {
+                    chmod($item->getPathname(), 0644);
+                    unlink($item->getPathname());
                 }
             }
+
             rmdir($this->fixturesDir);
         }
     });
@@ -45,17 +56,23 @@ describe('FileUploadTrait', function (): void {
     });
 
     test('exception thrown for missing or unreadable files', function (): void {
-        // Create a file with no read permissions (if possible on this system)
-        $unreadableFile = $this->fixturesDir.'/unreadable.mp3';
+        // Create a directory with no read permissions containing a file
+        // This ensures the file path exists but is not readable across all platforms
+        $unreadableDir = $this->fixturesDir.'/unreadable_dir';
+        mkdir($unreadableDir, 0777);
+
+        $unreadableFile = $unreadableDir.'/file.mp3';
         file_put_contents($unreadableFile, 'test content');
-        chmod($unreadableFile, 0000);
+
+        // Remove read permissions from the directory, making files inside unreadable
+        chmod($unreadableDir, 0000);
 
         try {
             expect(fn () => $this->trait->createMultipartRequestPublic($unreadableFile, []))
                 ->toThrow(FileUploadException::class);
         } finally {
             // Restore permissions for cleanup
-            chmod($unreadableFile, 0644);
+            chmod($unreadableDir, 0755);
         }
     });
 

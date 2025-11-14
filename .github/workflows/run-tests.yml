@@ -49,4 +49,5 @@ jobs:
         run: composer show -D
 
       - name: Execute tests
-        run: vendor/bin/pest --ci
+        # Exclude sandbox tests requiring real API credentials
+        run: vendor/bin/pest --ci --exclude-group=sandbox-test

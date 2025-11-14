@@ -11,9 +11,11 @@ describe('TextToSpeechResponse', function () {
         $base64Audio = base64_encode($rawBinary);
 
         $responseData = [
-            'audio' => $base64Audio,
-            'content_type' => 'audio/mpeg',
-            'duration' => 3.5,
+            'google' => [
+                'audio' => $base64Audio,
+                'content_type' => 'audio/mpeg',
+                'duration' => 3.5,
+            ],
         ];
 
         $response = TextToSpeechResponse::fromResponse($responseData);
@@ -22,36 +24,45 @@ describe('TextToSpeechResponse', function () {
             ->and($response->audioData)->not->toBe($base64Audio);
     });
 
-    test('contentType property is set correctly', function () {
+    test('contentType defaults to audio/mpeg', function () {
         $responseData = [
-            'audio' => base64_encode('audio data'),
-            'content_type' => 'audio/wav',
+            'amazon' => [
+                'audio' => base64_encode('audio data'),
+            ],
         ];
 
         $response = TextToSpeechResponse::fromResponse($responseData);
 
-        expect($response->contentType)->toBe('audio/wav');
+        expect($response->contentType)->toBe('audio/mpeg');
     });
 
-    test('handles different audio content types', function () {
-        $contentTypes = ['audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/flac'];
+    test('extracts audio from first provider in response', function () {
+        $audioData1 = 'first provider audio';
+        $audioData2 = 'second provider audio';
 
-        foreach ($contentTypes as $contentType) {
-            $responseData = [
-                'audio' => base64_encode('audio data'),
-                'content_type' => $contentType,
-            ];
+        $responseData = [
+            'google' => [
+                'audio' => base64_encode($audioData1),
+                'duration' => 2.5,
+            ],
+            'amazon' => [
+                'audio' => base64_encode($audioData2),
+                'duration' => 3.0,
+            ],
+        ];
 
-            $response = TextToSpeechResponse::fromResponse($responseData);
+        $response = TextToSpeechResponse::fromResponse($responseData);
 
-            expect($response->contentType)->toBe($contentType);
-        }
+        // Should use first provider (google in this case)
+        expect($response->audioData)->toBe($audioData1)
+            ->and($response->duration)->toBe(2.5);
     });
 
     test('duration handles null values', function () {
         $responseData = [
-            'audio' => base64_encode('audio data'),
-            'content_type' => 'audio/mpeg',
+            'google' => [
+                'audio' => base64_encode('audio data'),
+            ],
         ];
 
         $response = TextToSpeechResponse::fromResponse($responseData);
@@ -61,9 +72,10 @@ describe('TextToSpeechResponse', function () {
 
     test('duration handles float values', function () {
         $responseData = [
-            'audio' => base64_encode('audio data'),
-            'content_type' => 'audio/mpeg',
-            'duration' => 5.75,
+            'amazon' => [
+                'audio' => base64_encode('audio data'),
+                'duration' => 5.75,
+            ],
         ];
 
         $response = TextToSpeechResponse::fromResponse($responseData);
@@ -74,12 +86,13 @@ describe('TextToSpeechResponse', function () {
 
     test('lenient handling of unknown response keys', function () {
         $responseData = [
-            'audio' => base64_encode('audio data'),
-            'content_type' => 'audio/mpeg',
-            'duration' => 2.5,
-            'unknown_field' => 'should be ignored',
-            'extra_metadata' => ['nested' => 'data'],
-            'provider_info' => 'extra data',
+            'google' => [
+                'audio' => base64_encode('audio data'),
+                'duration' => 2.5,
+                'unknown_field' => 'should be ignored',
+                'extra_metadata' => ['nested' => 'data'],
+                'provider_info' => 'extra data',
+            ],
         ];
 
         $response = TextToSpeechResponse::fromResponse($responseData);
@@ -95,8 +108,9 @@ describe('TextToSpeechResponse', function () {
         $base64Audio = base64_encode($rawBinary);
 
         $responseData = [
-            'audio' => $base64Audio,
-            'content_type' => 'audio/mpeg',
+            'microsoft' => [
+                'audio' => $base64Audio,
+            ],
         ];
 
         $response = TextToSpeechResponse::fromResponse($responseData);
@@ -109,8 +123,9 @@ describe('TextToSpeechResponse', function () {
 
     test('extends AbstractResponseDTO', function () {
         $responseData = [
-            'audio' => base64_encode('audio data'),
-            'content_type' => 'audio/mpeg',
+            'openai' => [
+                'audio' => base64_encode('audio data'),
+            ],
         ];
 
         $response = TextToSpeechResponse::fromResponse($responseData);
@@ -120,8 +135,9 @@ describe('TextToSpeechResponse', function () {
 
     test('properties use readonly modifier for immutability', function () {
         $responseData = [
-            'audio' => base64_encode('audio data'),
-            'content_type' => 'audio/mpeg',
+            'deepgram' => [
+                'audio' => base64_encode('audio data'),
+            ],
         ];
 
         $response = TextToSpeechResponse::fromResponse($responseData);
@@ -144,9 +160,10 @@ describe('TextToSpeechResponse', function () {
         $base64Audio = base64_encode($rawBinary);
 
         $responseData = [
-            'audio' => $base64Audio,
-            'content_type' => 'audio/mpeg',
-            'duration' => 1.5,
+            'azure' => [
+                'audio' => $base64Audio,
+                'duration' => 1.5,
+            ],
         ];
 
         $response = TextToSpeechResponse::fromResponse($responseData);
@@ -155,5 +172,15 @@ describe('TextToSpeechResponse', function () {
         expect($response->audioData)->toBe($rawBinary)
             ->and($response->contentType)->toBe('audio/mpeg')
             ->and($response->duration)->toBe(1.5);
+    });
+
+    test('handles empty response gracefully', function () {
+        $responseData = [];
+
+        $response = TextToSpeechResponse::fromResponse($responseData);
+
+        expect($response->audioData)->toBe('')
+            ->and($response->contentType)->toBe('audio/mpeg')
+            ->and($response->duration)->toBeNull();
     });
 });

@@ -20,8 +20,7 @@ describe('TextToSpeechRequest', function (): void {
             ->and($request->audioFormat)->toBeNull()
             ->and($request->rate)->toBeNull()
             ->and($request->pitch)->toBeNull()
-            ->and($request->volume)->toBeNull()
-            ->and($request->voiceModel)->toBeNull();
+            ->and($request->volume)->toBeNull();
     });
 
     test('toArray includes all non-null properties', function (): void {
@@ -31,10 +30,9 @@ describe('TextToSpeechRequest', function (): void {
             language: 'en',
             option: 'MALE',
             audioFormat: 'mp3',
-            rate: 1.5,
-            pitch: 1.2,
-            volume: 0.8,
-            voiceModel: 'standard',
+            rate: 2,
+            pitch: 1,
+            volume: 1,
         );
 
         $array = $request->toArray();
@@ -47,14 +45,12 @@ describe('TextToSpeechRequest', function (): void {
             ->and($array)->toHaveKey('rate')
             ->and($array)->toHaveKey('pitch')
             ->and($array)->toHaveKey('volume')
-            ->and($array)->toHaveKey('voice_model')
             ->and($array['text'])->toBe('Convert this to speech')
             ->and($array['option'])->toBe('MALE')
             ->and($array['audio_format'])->toBe('mp3')
-            ->and($array['rate'])->toBe(1.5)
-            ->and($array['pitch'])->toBe(1.2)
-            ->and($array['volume'])->toBe(0.8)
-            ->and($array['voice_model'])->toBe('standard');
+            ->and($array['rate'])->toBe(2)
+            ->and($array['pitch'])->toBe(1)
+            ->and($array['volume'])->toBe(1);
     });
 
     test('toArray excludes null optional parameters', function (): void {
@@ -67,7 +63,6 @@ describe('TextToSpeechRequest', function (): void {
             rate: null,
             pitch: null,
             volume: null,
-            voiceModel: null,
         );
 
         $array = $request->toArray();
@@ -75,12 +70,14 @@ describe('TextToSpeechRequest', function (): void {
         expect($array)->toHaveKey('text')
             ->and($array)->toHaveKey('providers')
             ->and($array)->toHaveKey('language')
+            ->and($array)->toHaveKey('rate')
+            ->and($array)->toHaveKey('pitch')
+            ->and($array)->toHaveKey('volume')
             ->and($array)->not->toHaveKey('option')
             ->and($array)->not->toHaveKey('audio_format')
-            ->and($array)->not->toHaveKey('rate')
-            ->and($array)->not->toHaveKey('pitch')
-            ->and($array)->not->toHaveKey('volume')
-            ->and($array)->not->toHaveKey('voice_model');
+            ->and($array['rate'])->toBe(0)
+            ->and($array['pitch'])->toBe(0)
+            ->and($array['volume'])->toBe(0);
     });
 
     test('providers array of ServiceProviderEnum is handled', function (): void {
@@ -124,35 +121,36 @@ describe('TextToSpeechRequest', function (): void {
             text: 'Partial parameters test',
             providers: [ServiceProviderEnum::REV_AI],
             language: 'es',
-            rate: 1.0,
+            rate: 1,
             pitch: null,
-            volume: 0.9,
+            volume: 1,
         );
 
         $array = $request->toArray();
 
         expect($array)->toHaveKey('rate')
+            ->and($array)->toHaveKey('pitch')
             ->and($array)->toHaveKey('volume')
-            ->and($array)->not->toHaveKey('pitch')
             ->and($array)->not->toHaveKey('option')
-            ->and($array['rate'])->toBe(1.0)
-            ->and($array['volume'])->toBe(0.9);
+            ->and($array['rate'])->toBe(1)
+            ->and($array['pitch'])->toBe(0)
+            ->and($array['volume'])->toBe(1);
     });
 
     test('negative rate pitch and volume values are allowed', function (): void {
-        // Server-side validation - we just accept any float values
+        // Server-side validation - we just accept any int values
         $request = new TextToSpeechRequest(
             text: 'Testing negative values',
             providers: [ServiceProviderEnum::IBMWATSON],
-            rate: -1.0,
-            pitch: -0.5,
-            volume: -0.3,
+            rate: -1,
+            pitch: -1,
+            volume: -1,
         );
 
         $array = $request->toArray();
 
-        expect($array['rate'])->toBe(-1.0)
-            ->and($array['pitch'])->toBe(-0.5)
-            ->and($array['volume'])->toBe(-0.3);
+        expect($array['rate'])->toBe(-1)
+            ->and($array['pitch'])->toBe(-1)
+            ->and($array['volume'])->toBe(-1);
     });
 });

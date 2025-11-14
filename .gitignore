@@ -34,3 +34,6 @@ phpstan.neon
 /.claude
 /agent-os
 /CLAUDE.md
+
+# Testing Environment
+.env.testing
