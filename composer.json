@@ -54,7 +54,7 @@
     },
     "scripts": {
         "analyse": "vendor/bin/phpstan analyse",
-        "test": "vendor/bin/pest --exclude-group=sandbox-test",
+        "test": "vendor/bin/pest --parallel --exclude-group=sandbox-test",
         "test:sandbox": "vendor/bin/pest --group=sandbox-test",
         "test-coverage": "vendor/bin/pest --coverage",
         "format": "vendor/bin/pint"
