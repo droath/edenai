@@ -66,17 +66,14 @@ final class Pipeline
      */
     public function process(RequestInterface $request, callable $final): ResponseInterface
     {
-        // Build the middleware chain from the end backwards
         $next = $final;
 
-        // Iterate middleware in reverse to build nested chain
         foreach (array_reverse($this->middleware) as $middleware) {
             $next = function (RequestInterface $req) use ($middleware, $next): ResponseInterface {
                 return $middleware->handle($req, $next);
             };
         }
 
-        // Execute the chain
         return $next($request);
     }
 }

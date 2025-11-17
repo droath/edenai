@@ -70,7 +70,6 @@ final class SpeechToTextAsyncRequest extends AbstractRequestDTO
             'language' => $this->language,
         ];
 
-        // Include optional parameters only if set
         if ($this->speakers !== null) {
             $data['speakers'] = $this->speakers;
         }

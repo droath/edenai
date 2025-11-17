@@ -132,38 +132,30 @@ final class AudioResource extends AbstractResource
      */
     public function speechToTextAsync(SpeechToTextAsyncRequest $request): SpeechToTextAsyncResponse
     {
-        // Create a multipart request with file upload
         $multipartRequest = $this->createMultipartRequest(
             $request->file,
             $request->toArray()
         );
 
-        // Build full URI for the endpoint
         $uri = rtrim($this->client->getBaseUrl(), '/').$this->getBasePath().'/speech_to_text_async';
 
-        // Update request URI (createMultipartRequest creates request with empty URI)
         $multipartRequest = $multipartRequest->withUri(
             $multipartRequest->getUri()->withPath(parse_url($uri, PHP_URL_PATH) ?? '')
         );
 
-        // Update the request with the correct URI
         $requestFactory = Psr17FactoryDiscovery::findRequestFactory();
         $finalRequest = $requestFactory->createRequest('POST', $uri);
 
-        // Copy headers from multipart request
         foreach ($multipartRequest->getHeaders() as $name => $values) {
             foreach ($values as $value) {
                 $finalRequest = $finalRequest->withHeader($name, $value);
             }
         }
 
-        // Copy body from a multipart request
         $finalRequest = $finalRequest->withBody($multipartRequest->getBody());
 
-        // Send request through ApiClient middleware pipeline
         $response = $this->client->sendRequest($finalRequest);
 
-        // Parse response with JSON_THROW_ON_ERROR
         $data = json_decode(
             $response->getBody()->getContents(),
             true,
@@ -171,7 +163,6 @@ final class AudioResource extends AbstractResource
             JSON_THROW_ON_ERROR
         );
 
-        // Return strongly typed response DTO
         return SpeechToTextAsyncResponse::fromResponse($data);
     }
 
@@ -193,10 +184,8 @@ final class AudioResource extends AbstractResource
      */
     public function textToSpeech(TextToSpeechRequest $request): TextToSpeechResponse
     {
-        // Send POST request with JSON payload
         $response = $this->post('/text_to_speech', $request->toArray());
 
-        // Parse response with JSON_THROW_ON_ERROR
         $data = json_decode(
             $response->getBody()->getContents(),
             true,
@@ -204,7 +193,6 @@ final class AudioResource extends AbstractResource
             JSON_THROW_ON_ERROR
         );
 
-        // Return strongly typed response DTO (automatically decodes Base64 audio)
         return TextToSpeechResponse::fromResponse($data);
     }
 
@@ -225,10 +213,8 @@ final class AudioResource extends AbstractResource
      */
     public function textToSpeechAsync(TextToSpeechAsyncRequest $request): TextToSpeechAsyncResponse
     {
-        // Send POST request with JSON payload
         $response = $this->post('/text_to_speech_async', $request->toArray());
 
-        // Parse response with JSON_THROW_ON_ERROR
         $data = json_decode(
             $response->getBody()->getContents(),
             true,
@@ -236,7 +222,6 @@ final class AudioResource extends AbstractResource
             JSON_THROW_ON_ERROR
         );
 
-        // Return strongly typed response DTO
         return TextToSpeechAsyncResponse::fromResponse($data);
     }
 
@@ -267,17 +252,14 @@ final class AudioResource extends AbstractResource
         bool $showBase64 = true,
         bool $showOriginalResponse = false,
     ): TextToSpeechAsyncJobResultResponse {
-        // Build query parameters
         $queryParams = http_build_query([
             'response_as_dict' => $responseAsDict ? 'true' : 'false',
             'show_base_64' => $showBase64 ? 'true' : 'false',
             'show_original_response' => $showOriginalResponse ? 'true' : 'false',
         ]);
 
-        // Send GET request with public ID in path and query parameters
         $response = $this->get("/text_to_speech_async/{$publicId}?{$queryParams}");
 
-        // Parse response with JSON_THROW_ON_ERROR
         $data = json_decode(
             $response->getBody()->getContents(),
             true,
@@ -285,7 +267,6 @@ final class AudioResource extends AbstractResource
             JSON_THROW_ON_ERROR
         );
 
-        // Return strongly typed response DTO
         return TextToSpeechAsyncJobResultResponse::fromResponse($data);
     }
 
@@ -319,17 +300,14 @@ final class AudioResource extends AbstractResource
         bool $showBase64 = true,
         bool $showOriginalResponse = false,
     ): TextToSpeechAsyncJobListResponse {
-        // Build query parameters
         $queryParams = http_build_query([
             'response_as_dict' => $responseAsDict ? 'true' : 'false',
             'show_base_64' => $showBase64 ? 'true' : 'false',
             'show_original_response' => $showOriginalResponse ? 'true' : 'false',
         ]);
 
-        // Send GET request with query parameters
         $response = $this->get("/text_to_speech_async?{$queryParams}");
 
-        // Parse response with JSON_THROW_ON_ERROR
         $data = json_decode(
             $response->getBody()->getContents(),
             true,
@@ -337,7 +315,6 @@ final class AudioResource extends AbstractResource
             JSON_THROW_ON_ERROR
         );
 
-        // Return strongly typed response DTO
         return TextToSpeechAsyncJobListResponse::fromResponse($data);
     }
 
@@ -358,7 +335,6 @@ final class AudioResource extends AbstractResource
      */
     public function deleteTextToSpeechAsyncJobs(): void
     {
-        // Send DELETE request (API returns 204 No Content)
         $this->delete('/text_to_speech_async');
     }
 }

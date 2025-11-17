@@ -39,27 +39,20 @@ trait FileUploadTrait
      */
     protected function createMultipartRequest(string $filePath, array $params): RequestInterface
     {
-        // Validate file using shared validation trait
         $this->validateAudioFile($filePath);
 
-        // Generate boundary for multipart request
         $boundary = uniqid('----EdenAI', true);
 
-        // Build multipart body
         $body = $this->buildMultipartBody($filePath, $params, $boundary);
 
-        // Create request using PSR-17 factories
         $requestFactory = Psr17FactoryDiscovery::findRequestFactory();
         $streamFactory = Psr17FactoryDiscovery::findStreamFactory();
 
-        // Create base request (URI will be set by the calling resource)
         $request = $requestFactory->createRequest('POST', '');
 
-        // Set multipart body
         $stream = $streamFactory->createStream($body);
         $request = $request->withBody($stream);
 
-        // Set Content-Type header with boundary
         $request = $request->withHeader('Content-Type', "multipart/form-data; boundary={$boundary}");
 
         return $request;
@@ -78,7 +71,6 @@ trait FileUploadTrait
     {
         $parts = [];
 
-        // Add file part
         $filename = basename($filePath);
         $fileContents = file_get_contents($filePath);
         $mimeType = $this->getMimeType($filePath);
@@ -88,12 +80,10 @@ trait FileUploadTrait
         $parts[] = "Content-Type: {$mimeType}\r\n\r\n";
         $parts[] = "{$fileContents}\r\n";
 
-        // Add additional parameters
         foreach ($params as $name => $value) {
             $parts[] = "--{$boundary}\r\n";
             $parts[] = "Content-Disposition: form-data; name=\"{$name}\"\r\n\r\n";
 
-            // Serialize value based on type
             if (is_array($value)) {
                 $parts[] = json_encode($value, JSON_THROW_ON_ERROR)."\r\n";
             } elseif (is_bool($value)) {
@@ -103,7 +93,6 @@ trait FileUploadTrait
             }
         }
 
-        // Add closing boundary
         $parts[] = "--{$boundary}--\r\n";
 
         return implode('', $parts);

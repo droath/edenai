@@ -32,22 +32,18 @@ trait FileValidationTrait
      */
     protected function validateAudioFile(string $filePath): void
     {
-        // Validate file exists
         if (! file_exists($filePath)) {
             throw new FileUploadException("File not found: {$filePath}");
         }
 
-        // Validate path is a file (not a directory)
         if (! is_file($filePath)) {
             throw new FileUploadException("Path is not a file: {$filePath}");
         }
 
-        // Validate file is readable
         if (! is_readable($filePath)) {
             throw new FileUploadException("File is not readable: {$filePath}");
         }
 
-        // Validate audio format
         $extension = mb_strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
         if (! in_array($extension, self::SUPPORTED_AUDIO_FORMATS, true)) {
             throw new ValidationException(

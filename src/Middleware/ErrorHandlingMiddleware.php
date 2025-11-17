@@ -85,15 +85,12 @@ final class ErrorHandlingMiddleware implements MiddlewareInterface
 
         $statusCode = $response->getStatusCode();
 
-        // Pass successful responses through unchanged
         if ($statusCode >= 200 && $statusCode < 300) {
             return $response;
         }
 
-        // Extract error details from response body
         $responseBody = $this->parseResponseBody($response);
 
-        // Map status codes to specific exceptions
         match (true) {
             $statusCode === 401 => throw new AuthenticationException(
                 $responseBody['message'] ?? 'Invalid or missing API credentials',

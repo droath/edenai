@@ -2,7 +2,7 @@
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/droath/edenai.svg?style=flat-square)](https://packagist.org/packages/droath/edenai)
 [![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/droath/edenai/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/droath/edenai/actions?query=workflow%3Arun-tests+branch%3Amain)
-[![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/droath/edenai/fix-php-code-style-issues.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/droath/edenai/actions?query=workflow%3A"Fix+PHP+code+style+issues"+branch%3Amain)
+[![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/droath/edenai/phpstan.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/droath/edenai/actions?query=workflow%3A"Fix+PHP+code+style+issues"+branch%3Amain)
 [![Total Downloads](https://img.shields.io/packagist/dt/droath/edenai.svg?style=flat-square)](https://packagist.org/packages/droath/edenai)
 
 A modern, type-safe PHP SDK for the EdenAI API. Built with strict type safety, immutability, and PSR standards compliance, this SDK provides a robust foundation for integrating AI capabilities into your PHP applications.
@@ -122,7 +122,7 @@ $response = $audioResource->speechToTextAsync($request);
 
 echo "Job ID: {$response->jobId}";
 echo "Providers: " . implode(', ', $response->providers);
-echo "Created: {$response->timestamp->format('Y-m-d H:i:s')}";
+echo "Created: {$response->submittedAt->format('Y-m-d H:i:s')}";
 ```
 
 **Supported Audio Formats:** mp3, wav, flac, ogg
@@ -144,27 +144,27 @@ use Droath\Edenai\Enums\ServiceProviderEnum;
 $client = new ApiClient();
 $audioResource = new AudioResource($client);
 
-// Create request with all optional parameters
+// Create request with optional parameters
 $request = new TextToSpeechRequest(
     text: 'Hello world',
     providers: [ServiceProviderEnum::AMAZON],
     language: 'en',
     option: 'FEMALE',
     audioFormat: 'mp3',
-    rate: 1.0,
-    pitch: 0.0,
-    volume: 1.0,
-    voiceModel: 'neural',
+    rate: 1,
+    pitch: 0,
+    volume: 1,
 );
 
 // Get generated audio immediately
 $response = $audioResource->textToSpeech($request);
 
 // Save audio to file (already decoded from Base64)
-file_put_contents('output.mp3', $response->audioData);
-
-echo "Audio type: {$response->contentType}";
-echo "Duration: {$response->duration} seconds";
+// Response contains results from all providers
+foreach ($response->results as $result) {
+    file_put_contents("output_{$result->provider}.mp3", $result->audioData);
+    echo "Provider: {$result->provider}, Voice type: {$result->voiceType}\n";
+}
 ```
 
 ### Text-to-Speech (Async)
@@ -197,7 +197,7 @@ $request = new TextToSpeechAsyncRequest(
 $response = $audioResource->textToSpeechAsync($request);
 
 echo "Job ID: {$response->jobId}";
-echo "Check status later to retrieve generated audio";
+echo "Created: {$response->submittedAt->format('Y-m-d H:i:s')}";
 ```
 
 ### AI Service Providers
