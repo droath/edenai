@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Droath\Edenai\Enums\VoiceOptionEnum;
 use Droath\Edenai\Enums\ServiceProviderEnum;
 use Droath\Edenai\DTOs\Audio\TextToSpeechAsyncRequest;
 
@@ -128,5 +129,94 @@ describe('TextToSpeechAsyncRequest', function (): void {
 
         expect($array['providers'])->toBe(['google', 'amazon', 'speechmatics'])
             ->and($array['language'])->toBe('de');
+    });
+
+    test('settings parameter is excluded from toArray when null', function (): void {
+        $request = new TextToSpeechAsyncRequest(
+            text: 'Async without settings',
+            providers: [ServiceProviderEnum::GOOGLE],
+            language: 'en',
+            settings: null,
+        );
+
+        $array = $request->toArray();
+
+        expect($array)->not->toHaveKey('settings');
+    });
+
+    test('settings parameter is included in toArray when provided', function (): void {
+        $settings = [
+            'google' => 'en-US-Neural2-C',
+            'amazon' => 'neural',
+        ];
+
+        $request = new TextToSpeechAsyncRequest(
+            text: 'Async with settings',
+            providers: [ServiceProviderEnum::GOOGLE, ServiceProviderEnum::AMAZON],
+            language: 'en',
+            settings: $settings,
+        );
+
+        $array = $request->toArray();
+
+        expect($array)->toHaveKey('settings')
+            ->and($array['settings'])->toBe($settings)
+            ->and($array['settings']['google'])->toBe('en-US-Neural2-C')
+            ->and($array['settings']['amazon'])->toBe('neural');
+    });
+
+    test('settings parameter with single provider in async request', function (): void {
+        $request = new TextToSpeechAsyncRequest(
+            text: 'Single provider async settings',
+            providers: [ServiceProviderEnum::MICROSOFT],
+            language: 'fr',
+            settings: ['microsoft' => 'fr-FR-DeniseNeural'],
+        );
+
+        $array = $request->toArray();
+
+        expect($array)->toHaveKey('settings')
+            ->and($array['settings'])->toBe(['microsoft' => 'fr-FR-DeniseNeural']);
+    });
+
+    test('settings parameter with multiple providers in async request', function (): void {
+        $settings = [
+            'google' => 'de-DE-Wavenet-F',
+            'azure' => 'de-DE-KatjaNeural',
+            'ibm' => 'de-DE_BirgitV3Voice',
+        ];
+
+        $request = new TextToSpeechAsyncRequest(
+            text: 'Multi-provider async settings',
+            providers: [ServiceProviderEnum::GOOGLE, ServiceProviderEnum::AZURE, ServiceProviderEnum::IBMWATSON],
+            language: 'de',
+            settings: $settings,
+        );
+
+        $array = $request->toArray();
+
+        expect($array)->toHaveKey('settings')
+            ->and($array['settings'])->toBe($settings)
+            ->and($array['settings'])->toHaveCount(3);
+    });
+
+    test('factory method supports settings parameter', function (): void {
+        $settings = [
+            'google' => 'es-ES-Neural2-A',
+            'microsoft' => 'es-ES-ElviraNeural',
+        ];
+
+        $request = TextToSpeechAsyncRequest::make(
+            text: 'Async factory with settings',
+            providers: [ServiceProviderEnum::GOOGLE, ServiceProviderEnum::MICROSOFT],
+            option: VoiceOptionEnum::FEMALE,
+            language: 'es',
+            settings: $settings,
+        );
+
+        expect($request->settings)->toBe($settings)
+            ->and($request->option)->toBe('FEMALE')
+            ->and($request->toArray())->toHaveKey('settings')
+            ->and($request->toArray()['settings'])->toBe($settings);
     });
 });

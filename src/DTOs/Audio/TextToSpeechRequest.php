@@ -17,9 +17,12 @@ use Droath\Edenai\Enums\ServiceProviderEnum;
  * the fail-fast principle. Audio parameter ranges (rate, pitch, volume) are
  * validated server-side by Eden AI, so client-side range validation is omitted.
  *
- * All optional audio parameters (option, audioFormat, rate, pitch, volume, voiceModel)
+ * All optional audio parameters (option, audioFormat, rate, pitch, volume, settings)
  * are nullable to support provider defaults. When null, these parameters are excluded
  * from the API request, allowing the provider to use its default values.
+ *
+ * The settings parameter allows specification of provider-specific model configurations,
+ * enabling fine-grained control over which models are used for each provider.
  *
  * @package Droath\Edenai\DTOs\Audio
  */
@@ -36,6 +39,7 @@ final class TextToSpeechRequest extends AbstractRequestDTO
      * @param int|null $rate Speech rate modifier (provider-specific range, typically 0.5-2.0)
      * @param int|null $pitch Voice pitch modifier (provider-specific range)
      * @param int|null $volume Audio volume modifier (provider-specific range, typically 0.0-1.0)
+     * @param array<string, string>|null $settings Provider-specific model configurations (e.g., ['google' => 'en-US-Neural2-A', 'ibm' => 'en-US_AllisonV3Voice'])
      */
     public function __construct(
         public readonly string $text,
@@ -45,7 +49,8 @@ final class TextToSpeechRequest extends AbstractRequestDTO
         public readonly ?string $audioFormat = null,
         public readonly ?int $rate = null,
         public readonly ?int $pitch = null,
-        public readonly ?int $volume = null
+        public readonly ?int $volume = null,
+        public readonly ?array $settings = null,
     ) {
         if ($this->text === '') {
             throw new InvalidArgumentException('Text cannot be empty');
@@ -66,6 +71,7 @@ final class TextToSpeechRequest extends AbstractRequestDTO
      * @param int|null $rate Speech rate modifier (provider-specific range, typically 0.5-2.0)
      * @param int|null $pitch Voice pitch modifier (provider-specific range)
      * @param int|null $volume Audio volume modifier (provider-specific range, typically 0.0-1.0)
+     * @param array<string, string>|null $settings Provider-specific model configurations (e.g., ['google' => 'en-US-Neural2-A', 'ibm' => 'en-US_AllisonV3Voice'])
      *
      * @return self
      *
@@ -79,7 +85,8 @@ final class TextToSpeechRequest extends AbstractRequestDTO
         ?string $audioFormat = null,
         ?int $rate = null,
         ?int $pitch = null,
-        ?int $volume = null
+        ?int $volume = null,
+        ?array $settings = null,
     ): self {
         return new self(
             text: $text,
@@ -89,7 +96,8 @@ final class TextToSpeechRequest extends AbstractRequestDTO
             audioFormat: $audioFormat,
             rate: $rate,
             pitch: $pitch,
-            volume: $volume
+            volume: $volume,
+            settings: $settings,
         );
     }
 
@@ -122,6 +130,10 @@ final class TextToSpeechRequest extends AbstractRequestDTO
 
         if ($this->audioFormat !== null) {
             $data['audio_format'] = $this->audioFormat;
+        }
+
+        if ($this->settings !== null) {
+            $data['settings'] = $this->settings;
         }
 
         return $data;

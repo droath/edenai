@@ -165,4 +165,85 @@ describe('SpeechToTextAsyncRequest', function (): void {
         expect($request->language)->toBe('en')
             ->and($request->toArray()['language'])->toBe('en');
     });
+
+    test('settings parameter is excluded from toArray when null', function (): void {
+        $audioFile = $this->fixturesDir.'/speech.mp3';
+        file_put_contents($audioFile, 'fake audio content');
+
+        $request = new SpeechToTextAsyncRequest(
+            file: $audioFile,
+            providers: [ServiceProviderEnum::GOOGLE],
+            language: 'en',
+            settings: null,
+        );
+
+        $array = $request->toArray();
+
+        expect($array)->not->toHaveKey('settings');
+    });
+
+    test('settings parameter is included in toArray when provided', function (): void {
+        $audioFile = $this->fixturesDir.'/speech.wav';
+        file_put_contents($audioFile, 'fake audio content');
+
+        $settings = [
+            'google' => 'video',
+            'ibm' => 'telephony',
+        ];
+
+        $request = new SpeechToTextAsyncRequest(
+            file: $audioFile,
+            providers: [ServiceProviderEnum::GOOGLE, ServiceProviderEnum::IBMWATSON],
+            language: 'en',
+            settings: $settings,
+        );
+
+        $array = $request->toArray();
+
+        expect($array)->toHaveKey('settings')
+            ->and($array['settings'])->toBe($settings)
+            ->and($array['settings']['google'])->toBe('video')
+            ->and($array['settings']['ibm'])->toBe('telephony');
+    });
+
+    test('settings parameter with single provider for speech-to-text', function (): void {
+        $audioFile = $this->fixturesDir.'/speech.flac';
+        file_put_contents($audioFile, 'fake audio content');
+
+        $request = new SpeechToTextAsyncRequest(
+            file: $audioFile,
+            providers: [ServiceProviderEnum::AMAZON],
+            language: 'en',
+            settings: ['amazon' => 'medical'],
+        );
+
+        $array = $request->toArray();
+
+        expect($array)->toHaveKey('settings')
+            ->and($array['settings'])->toBe(['amazon' => 'medical']);
+    });
+
+    test('settings parameter with multiple providers for speech-to-text', function (): void {
+        $audioFile = $this->fixturesDir.'/speech.ogg';
+        file_put_contents($audioFile, 'fake audio content');
+
+        $settings = [
+            'google' => 'latest_long',
+            'microsoft' => 'conversation',
+            'deepgram' => 'nova-2',
+        ];
+
+        $request = new SpeechToTextAsyncRequest(
+            file: $audioFile,
+            providers: [ServiceProviderEnum::GOOGLE, ServiceProviderEnum::MICROSOFT, ServiceProviderEnum::DEEPGRAM],
+            language: 'en',
+            settings: $settings,
+        );
+
+        $array = $request->toArray();
+
+        expect($array)->toHaveKey('settings')
+            ->and($array['settings'])->toBe($settings)
+            ->and($array['settings'])->toHaveCount(3);
+    });
 });

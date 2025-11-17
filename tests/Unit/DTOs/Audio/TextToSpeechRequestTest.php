@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Droath\Edenai\Enums\VoiceOptionEnum;
 use Droath\Edenai\Enums\ServiceProviderEnum;
 use Droath\Edenai\DTOs\Audio\TextToSpeechRequest;
 
@@ -152,5 +153,94 @@ describe('TextToSpeechRequest', function (): void {
         expect($array['rate'])->toBe(-1)
             ->and($array['pitch'])->toBe(-1)
             ->and($array['volume'])->toBe(-1);
+    });
+
+    test('settings parameter is excluded from toArray when null', function (): void {
+        $request = new TextToSpeechRequest(
+            text: 'Test without settings',
+            providers: [ServiceProviderEnum::GOOGLE],
+            language: 'en',
+            settings: null,
+        );
+
+        $array = $request->toArray();
+
+        expect($array)->not->toHaveKey('settings');
+    });
+
+    test('settings parameter is included in toArray when provided', function (): void {
+        $settings = [
+            'google' => 'en-US-Neural2-A',
+            'ibm' => 'en-US_AllisonV3Voice',
+        ];
+
+        $request = new TextToSpeechRequest(
+            text: 'Test with settings',
+            providers: [ServiceProviderEnum::GOOGLE, ServiceProviderEnum::IBMWATSON],
+            language: 'en',
+            settings: $settings,
+        );
+
+        $array = $request->toArray();
+
+        expect($array)->toHaveKey('settings')
+            ->and($array['settings'])->toBe($settings)
+            ->and($array['settings']['google'])->toBe('en-US-Neural2-A')
+            ->and($array['settings']['ibm'])->toBe('en-US_AllisonV3Voice');
+    });
+
+    test('settings parameter with single provider', function (): void {
+        $request = new TextToSpeechRequest(
+            text: 'Single provider settings',
+            providers: [ServiceProviderEnum::AMAZON],
+            language: 'en',
+            settings: ['amazon' => 'neural'],
+        );
+
+        $array = $request->toArray();
+
+        expect($array)->toHaveKey('settings')
+            ->and($array['settings'])->toBe(['amazon' => 'neural']);
+    });
+
+    test('settings parameter with multiple providers', function (): void {
+        $settings = [
+            'google' => 'en-GB-Wavenet-A',
+            'microsoft' => 'en-US-AriaNeural',
+            'amazon' => 'neural',
+        ];
+
+        $request = new TextToSpeechRequest(
+            text: 'Multiple provider settings',
+            providers: [ServiceProviderEnum::GOOGLE, ServiceProviderEnum::MICROSOFT, ServiceProviderEnum::AMAZON],
+            language: 'en',
+            settings: $settings,
+        );
+
+        $array = $request->toArray();
+
+        expect($array)->toHaveKey('settings')
+            ->and($array['settings'])->toBe($settings)
+            ->and($array['settings'])->toHaveCount(3);
+    });
+
+    test('factory method supports settings parameter', function (): void {
+        $settings = [
+            'google' => 'en-US-Neural2-D',
+            'amazon' => 'standard',
+        ];
+
+        $request = TextToSpeechRequest::make(
+            text: 'Factory with settings',
+            providers: [ServiceProviderEnum::GOOGLE, ServiceProviderEnum::AMAZON],
+            option: VoiceOptionEnum::MALE,
+            language: 'en',
+            settings: $settings,
+        );
+
+        expect($request->settings)->toBe($settings)
+            ->and($request->option)->toBe('MALE')
+            ->and($request->toArray())->toHaveKey('settings')
+            ->and($request->toArray()['settings'])->toBe($settings);
     });
 });

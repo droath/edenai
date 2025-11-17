@@ -21,6 +21,13 @@ use Droath\Edenai\Exceptions\ValidationException;
  * file upload is handled separately by FileUploadTrait, so toArray() excludes
  * the file property and only serializes the form parameters.
  *
+ * All optional parameters (speakers, profanityFilter, settings) are nullable to
+ * support provider defaults. When null, these parameters are excluded from the
+ * API request, allowing the provider to use its default values.
+ *
+ * The settings parameter allows specification of provider-specific model configurations,
+ * enabling fine-grained control over which models are used for each provider.
+ *
  * Supported audio formats: mp3, wav, flac, ogg
  *
  * @package Droath\Edenai\DTOs\Audio
@@ -37,6 +44,7 @@ final class SpeechToTextAsyncRequest extends AbstractRequestDTO
      * @param string $language ISO language code for transcription (default: 'en')
      * @param int|null $speakers Number of speakers to detect (optional)
      * @param bool|null $profanityFilter Enable profanity filtering (optional)
+     * @param array<string, string>|null $settings Provider-specific model configurations (e.g., ['google' => 'video', 'ibm' => 'telephony'])
      *
      * @throws FileUploadException If a file does not exist or is not readable
      * @throws ValidationException If a file format is not supported
@@ -47,6 +55,7 @@ final class SpeechToTextAsyncRequest extends AbstractRequestDTO
         public readonly string $language = 'en',
         public readonly ?int $speakers = null,
         public readonly ?bool $profanityFilter = null,
+        public readonly ?array $settings = null,
     ) {
         $this->validateAudioFile($file);
     }
@@ -76,6 +85,10 @@ final class SpeechToTextAsyncRequest extends AbstractRequestDTO
 
         if ($this->profanityFilter !== null) {
             $data['profanity_filter'] = $this->profanityFilter;
+        }
+
+        if ($this->settings !== null) {
+            $data['settings'] = $this->settings;
         }
 
         return $data;
