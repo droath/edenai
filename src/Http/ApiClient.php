@@ -113,7 +113,7 @@ final readonly class ApiClient
      *
      * @return string The API base URL
      */
-    protected function getBaseUrl(): string
+    public function getBaseUrl(): string
     {
         return $this->baseUrl ?? $this->getEnvironmentVariable('EDENAI_BASE_URL') ?? '';
     }
