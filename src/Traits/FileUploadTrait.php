@@ -66,6 +66,8 @@ trait FileUploadTrait
      * @param string $boundary Multipart boundary string
      *
      * @return string The complete multipart body
+     *
+     * @throws JsonException
      */
     private function buildMultipartBody(string $filePath, array $params, string $boundary): string
     {

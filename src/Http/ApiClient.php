@@ -113,7 +113,7 @@ final readonly class ApiClient
      *
      * @return string The API base URL
      */
-    public function getBaseUrl(): string
+    protected function getBaseUrl(): string
     {
         return $this->baseUrl ?? $this->getEnvironmentVariable('EDENAI_BASE_URL') ?? '';
     }
@@ -123,7 +123,7 @@ final readonly class ApiClient
      *
      * @return string|null The API authentication key
      */
-    public function getApiKey(): ?string
+    protected function getApiKey(): ?string
     {
         return $this->apiKey ?? $this->getEnvironmentVariable('EDENAI_API_KEY');
     }

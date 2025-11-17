@@ -12,8 +12,6 @@ use Droath\Edenai\Exceptions\ValidationException;
  *
  * This trait encapsulates common file validation logic that can be reused across
  * DTOs and resource classes that need to validate file uploads before processing.
- *
- * @package Droath\Edenai\Traits
  */
 trait FileValidationTrait
 {
@@ -47,7 +45,7 @@ trait FileValidationTrait
         $extension = mb_strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
         if (! in_array($extension, self::SUPPORTED_AUDIO_FORMATS, true)) {
             throw new ValidationException(
-                "Unsupported audio format: {$extension}. Supported formats: " . implode(', ', self::SUPPORTED_AUDIO_FORMATS),
+                "Unsupported audio format: {$extension}. Supported formats: ".implode(', ', self::SUPPORTED_AUDIO_FORMATS),
                 ['file' => ["Unsupported audio format: {$extension}"]]
             );
         }
