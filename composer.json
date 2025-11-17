@@ -1,9 +1,17 @@
 {
     "name": "droath/edenai",
-    "description": "This is my package edenai",
+    "description": "Modern, type-safe PHP SDK for the EdenAI API with PSR compliance and immutable DTOs",
     "keywords": [
-        "Droath",
-        "edenai"
+        "ai",
+        "api",
+        "artificial-intelligence",
+        "audio",
+        "client",
+        "edenai",
+        "machine-learning",
+        "sdk",
+        "speech-to-text",
+        "text-to-speech"
     ],
     "homepage": "https://github.com/droath/edenai",
     "license": "MIT",
@@ -39,12 +47,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Droath\\Edenai\\": "src/",
-            "Droath\\Edenai\\DTOs\\": "src/DTOs/",
-            "Droath\\Edenai\\Exceptions\\": "src/Exceptions/",
-            "Droath\\Edenai\\Http\\": "src/Http/",
-            "Droath\\Edenai\\Middleware\\": "src/Middleware/",
-            "Droath\\Edenai\\Resources\\": "src/Resources/"
+            "Droath\\Edenai\\": "src/"
         }
     },
     "autoload-dev": {
