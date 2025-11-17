@@ -9,6 +9,7 @@
         },
         "phpdoc_indent": true,
         "phpdoc_separation": true,
+        "single_line_empty_body": true,
         "backtick_to_shell_exec": true,
         "date_time_immutable": true,
         "declare_strict_types": true,

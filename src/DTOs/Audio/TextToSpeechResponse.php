@@ -9,28 +9,40 @@ use Droath\Edenai\DTOs\AbstractResponseDTO;
 /**
  * Response DTO for synchronous text-to-speech API endpoint.
  *
- * Contains the generated audio data (decoded from Base64) ready for immediate use,
- * along with content type and optional duration metadata. The audio data is stored
- * in a memory-efficient raw binary format suitable for file writing or streaming.
+ * Contains results from all requested AI providers, each with generated audio
+ * data (decoded from Base64), voice type, resource URL, and cost information.
+ * The audio data is stored in a memory-efficient raw binary format suitable
+ * for file writing or streaming.
  *
  * The fromResponse() factory automatically decodes Base64-encoded audio from the
  * API response to raw binary data, eliminating the need for manual decoding.
+ * Results from all providers are preserved in the response.
  *
  * Example API response:
  * ```json
  * {
- *   "audio": "UklGRiQAAABXQVZFZm10IBAAA...", // Base64-encoded audio
- *   "content_type": "audio/wav",
- *   "duration": 3.5
+ *   "openai": {
+ *     "audio": "//PkxABh5DnAA1rAAHnMkHAaGmLBwxGcw40yZczZ80p82Sw...",
+ *     "voice_type": 1,
+ *     "audio_resource_url": "https://example.com/audio.mp3",
+ *     "cost": 0
+ *   },
+ *   "deepgram": {
+ *     "audio": "//NgxAAb+cYwAnoSnAhgGQ6JWPWdavfq80FA8TiGGgE...",
+ *     "voice_type": 1,
+ *     "audio_resource_url": "https://example.com/audio2.mp3",
+ *     "cost": 0
+ *   }
  * }
  * ```
  *
  * Usage:
  * ```php
  * $response = TextToSpeechResponse::fromResponse($apiData);
- * file_put_contents('output.wav', $response->audioData);
- * echo "Content-Type: {$response->contentType}";
- * echo "Duration: {$response->duration} seconds";
+ * foreach ($response->results as $result) {
+ *     file_put_contents("audio_{$result->provider}.mp3", $result->audioData);
+ *     echo "Provider: {$result->provider}, Cost: {$result->cost}\n";
+ * }
  * ```
  */
 final class TextToSpeechResponse extends AbstractResponseDTO
@@ -38,26 +50,24 @@ final class TextToSpeechResponse extends AbstractResponseDTO
     /**
      * Create a new text-to-speech response DTO.
      *
-     * @param string $audioData Raw binary audio data (decoded from Base64)
-     * @param string $contentType MIME type of the audio (e.g., 'audio/wav', 'audio/mpeg')
-     * @param float|null $duration Optional audio duration in seconds
+     * @param array<int, ProviderResult> $results Array of provider-specific results
      */
     public function __construct(
-        public readonly string $audioData,
-        public readonly string $contentType,
-        public readonly ?float $duration = null,
-    ) {
-    }
+        public readonly array $results,
+    ) {}
 
     /**
      * Create a response DTO from API response data.
      *
-     * Automatically decodes Base64-encoded audio to raw binary format for
-     * immediate use. Handles missing optional fields (duration) with null defaults.
-     * Parses response leniently, ignoring any unknown keys from the API.
+     * Parses the Eden AI synchronous text-to-speech response, extracting results
+     * from all requested providers and transforming them into strongly typed
+     * ProviderResult DTOs. Automatically decodes Base64-encoded audio to raw
+     * binary format for immediate use.
      *
-     * The API returns provider-specific results with provider names as keys.
-     * This method extracts the first provider's audio data.
+     * The synchronous API returns provider-specific results with provider names
+     * as top-level keys (e.g., 'openai', 'deepgram'). This method preserves all
+     * provider results, unlike the previous implementation which only extracted
+     * the first provider.
      *
      * @param array<string, mixed> $data The API response data
      *
@@ -65,16 +75,16 @@ final class TextToSpeechResponse extends AbstractResponseDTO
      */
     public static function fromResponse(array $data): static
     {
-        $providerResult = reset($data);
+        $results = [];
 
-        if (! is_array($providerResult)) {
-            $providerResult = [];
+        foreach ($data as $provider => $providerData) {
+            if (is_array($providerData)) {
+                $results[] = ProviderResult::fromResponse($provider, $providerData);
+            }
         }
 
         return new self(
-            audioData: base64_decode((string) ($providerResult['audio'] ?? ''), true) ?: '',
-            contentType: 'audio/mpeg', // Default to audio/mpeg for MP3
-            duration: isset($providerResult['duration']) ? (float) $providerResult['duration'] : null,
+            results: $results,
         );
     }
 }

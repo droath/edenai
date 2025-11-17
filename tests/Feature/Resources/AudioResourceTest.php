@@ -109,7 +109,9 @@ describe('Feature: AudioResource - textToSpeech()', function (): void {
         $stream->shouldReceive('getContents')->andReturn(json_encode([
             'google' => [
                 'audio' => $base64Audio,
-                'duration' => null,
+                'voice_type' => 1,
+                'audio_resource_url' => 'https://api.edenai.run/v2/audio/google/123.mp3',
+                'cost' => 0,
             ],
         ]));
         $response->shouldReceive('getBody')->andReturn($stream);
@@ -140,9 +142,11 @@ describe('Feature: AudioResource - textToSpeech()', function (): void {
         $result = $resource->textToSpeech($requestDTO);
 
         expect($result)->toBeInstanceOf(TextToSpeechResponse::class)
-            ->and($result->audioData)->toBe($rawAudio) // Decoded from Base64
-            ->and($result->contentType)->toBe('audio/mpeg')
-            ->and($result->duration)->toBeNull();
+            ->and($result->results)->toHaveCount(1)
+            ->and($result->results[0]->provider)->toBe('google')
+            ->and($result->results[0]->audioData)->toBe($rawAudio)
+            ->and($result->results[0]->voiceType)->toBe(1)
+            ->and($result->results[0]->audioResourceUrl)->toContain('https://api.edenai.run');
     });
 });
 

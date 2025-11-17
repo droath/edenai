@@ -37,8 +37,7 @@ final class AuthenticationMiddleware implements MiddlewareInterface
      */
     public function __construct(
         private readonly ?string $apiKey,
-    ) {
-    }
+    ) {}
 
     /**
      * Inject the Authorization header with Bearer token into the request.

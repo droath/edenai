@@ -151,9 +151,7 @@ describe('ApiClient', function (): void {
         $executionOrder = [];
 
         $customMiddleware = new class ($executionOrder) implements \Droath\Edenai\Middleware\MiddlewareInterface {
-            public function __construct(private array &$order)
-            {
-            }
+            public function __construct(private array &$order) {}
 
             public function handle(RequestInterface $request, callable $next): ResponseInterface
             {

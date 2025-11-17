@@ -110,7 +110,9 @@ describe('Integration: Complete textToSpeech workflow', function (): void {
         $stream->shouldReceive('getContents')->andReturn(json_encode([
             'microsoft' => [
                 'audio' => $base64Audio,
-                'duration' => 12.5,
+                'voice_type' => 1,
+                'audio_resource_url' => 'https://api.edenai.run/v2/audio/microsoft/789.wav',
+                'cost' => 10,
             ],
         ]));
         $response->shouldReceive('getBody')->andReturn($stream);
@@ -139,9 +141,11 @@ describe('Integration: Complete textToSpeech workflow', function (): void {
         $result = $resource->textToSpeech($requestDTO);
 
         expect($result)->toBeInstanceOf(TextToSpeechResponse::class)
-            ->and($result->audioData)->toBe($rawAudio)
-            ->and($result->contentType)->toBe('audio/mpeg')
-            ->and($result->duration)->toBe(12.5);
+            ->and($result->results)->toHaveCount(1)
+            ->and($result->results[0]->provider)->toBe('microsoft')
+            ->and($result->results[0]->audioData)->toBe($rawAudio)
+            ->and($result->results[0]->voiceType)->toBe(1)
+            ->and($result->results[0]->cost)->toBe(10);
     });
 });
 
@@ -233,8 +237,7 @@ describe('Integration: Error handling scenarios', function (): void {
         $apiKey = 'network-error-key';
 
         // Create a simple exception class that implements ClientExceptionInterface
-        $networkException = new class ('Connection timeout') extends RuntimeException implements \Psr\Http\Client\ClientExceptionInterface {
-        };
+        $networkException = new class ('Connection timeout') extends RuntimeException implements \Psr\Http\Client\ClientExceptionInterface {};
 
         // Simulate network failure - middleware will retry, so expect 3 attempts
         $httpClient->shouldReceive('sendRequest')

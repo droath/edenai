@@ -46,8 +46,7 @@ final class SpeechToTextAsyncResponse extends AbstractResponseDTO
         public readonly string $jobId,
         public readonly array $providers,
         public readonly DateTimeImmutable $submittedAt,
-    ) {
-    }
+    ) {}
 
     /**
      * Create a response DTO from API response data.

@@ -174,8 +174,7 @@ describe('ErrorHandlingMiddleware', function (): void {
         $request = Mockery::mock(RequestInterface::class);
 
         // Create a real exception that implements ClientExceptionInterface
-        $clientException = new class ('Connection failed') extends Exception implements ClientExceptionInterface {
-        };
+        $clientException = new class ('Connection failed') extends Exception implements ClientExceptionInterface {};
 
         $next = function () use ($clientException): never {
             throw $clientException;
@@ -257,8 +256,7 @@ describe('RetryMiddleware', function (): void {
         $request = Mockery::mock(RequestInterface::class);
 
         // Create a real exception that implements ClientExceptionInterface
-        $clientException = new class ('Network error') extends Exception implements ClientExceptionInterface {
-        };
+        $clientException = new class ('Network error') extends Exception implements ClientExceptionInterface {};
 
         $attempts = 0;
         $next = function () use ($clientException, &$attempts): never {

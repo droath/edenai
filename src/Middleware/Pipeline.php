@@ -45,8 +45,7 @@ final class Pipeline
      */
     public function __construct(
         private readonly array $middleware,
-    ) {
-    }
+    ) {}
 
     /**
      * Process a request through the middleware pipeline.
