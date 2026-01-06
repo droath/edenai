@@ -1,5 +1,6 @@
 <?php
 
+
 declare(strict_types=1);
 
 namespace Droath\Edenai\Enums;
@@ -24,4 +25,10 @@ enum ServiceProviderEnum: string
     case SPEECHMATICS = 'speechmatics';
     case IBMWATSON = 'ibmwatson';
     case AZURE = 'azure';
+    case API4AI = 'api4ai';
+    case BASE64 = 'base64';
+    case CLARIFAI = 'clarifai';
+    case MINDEE = 'mindee';
+    case SENTISIGHT = 'sentisight';
+    case MISTRAL = 'mistral';
 }
